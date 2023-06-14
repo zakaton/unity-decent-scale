@@ -70,3 +70,16 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+/[Aa]ssets/Oculus*
+/[Aa]ssets/Plugins*
+/[Aa]ssets/Shatalmic*
+/[Aa]ssets/XR*
+/[Aa]ssets/TextMesh Pro*
+build*
+
+/[Pp]rojectSettings/
+
+mono_crash*
+
+.DS_Store
