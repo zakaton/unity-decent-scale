@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028334, g: 0.22571336, b: 0.3069219, a: 1}
+  m_IndirectSpecularColor: {r: 0.4440765, g: 0.49331635, b: 0.57239074, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1756,7 +1756,7 @@ RectTransform:
   - {fileID: 979014418}
   - {fileID: 212448450}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2913,7 +2913,7 @@ MonoBehaviour:
   - {fileID: 1918540304}
   - {fileID: 1289481770}
   loggerText: {fileID: 733584766}
-  TapStrapBLEMonoBehavior: {fileID: 952848800}
+  TapStrapBLEMonoBehavior: {fileID: 0}
   createMenu: {fileID: 595071470}
   editMenu: {fileID: 1769199466}
   colorMenu: {fileID: 1512385409}
@@ -2940,7 +2940,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &876549089
 GameObject:
@@ -2972,7 +2972,7 @@ Transform:
   m_Children:
   - {fileID: 248338080}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &905005473
 GameObject:
@@ -3158,110 +3158,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 905005473}
   m_CullTransparentMesh: 1
---- !u!1 &952848799
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 952848801}
-  - component: {fileID: 952848800}
-  m_Layer: 0
-  m_Name: RightTapStrap
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &952848800
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 952848799}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14a7d396836f4497880069dfe63ea3b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tapStrap:
-    loggerText: {fileID: 829388550}
-    IsConnected: 0
-    IsConnecting: 0
-    inputMode: 1
-    deviceName: Tap_D124264
-    autoConnect: 0
-    handSide: 1
-    enableLogging: 0
-    connectionEvents:
-      onConnect:
-        m_PersistentCalls:
-          m_Calls: []
-      onConnecting:
-        m_PersistentCalls:
-          m_Calls: []
-      onStopConnecting:
-        m_PersistentCalls:
-          m_Calls: []
-      onDisconnect:
-        m_PersistentCalls:
-          m_Calls: []
-    tapEvents:
-      tapData:
-        m_PersistentCalls:
-          m_Calls: []
-      mouse:
-        m_PersistentCalls:
-          m_Calls: []
-      mouseMode:
-        m_PersistentCalls:
-          m_Calls: []
-      airGesture:
-        m_PersistentCalls:
-          m_Calls: []
-      accelerometer:
-        m_PersistentCalls:
-          m_Calls: []
-      imu:
-        m_PersistentCalls:
-          m_Calls: []
-      raw:
-        m_PersistentCalls:
-          m_Calls: []
-    resetCoroutine: 0
-    mouseData: {x: 0, y: 0}
-    mouseProximation: 0
-    airGesture: 0
-    mouseMode: 0
-    accelerometerData:
-    - {x: 0, y: 0, z: 0}
-    - {x: 0, y: 0, z: 0}
-    - {x: 0, y: 0, z: 0}
-    - {x: 0, y: 0, z: 0}
-    - {x: 0, y: 0, z: 0}
-    accelerometerDataTimestamp: 0
-    imuData:
-    - {x: 0, y: 0, z: 0}
-    - {x: 0, y: 0, z: 0}
-    imuDataTimestamp: 0
---- !u!4 &952848801
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 952848799}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &960568411
 GameObject:
   m_ObjectHideFlags: 0
@@ -5136,7 +5032,7 @@ RectTransform:
   - {fileID: 2137585299}
   - {fileID: 15029145}
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -5920,7 +5816,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1769199466
 GameObject:
@@ -6022,7 +5918,7 @@ RectTransform:
   - {fileID: 1861670167}
   - {fileID: 334554220}
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}

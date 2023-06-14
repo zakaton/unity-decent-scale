@@ -8,52 +8,36 @@ using System.Collections.Generic;
 */
 
 [Serializable]
-public class TapStrapBLE : TapStrap
+public class DecentScaleBLE : DecentScale
 {
-	static private string GENERATE_DATA_UUID(string value)
+	[HideInInspector]
+	private string deviceName = "Decent Scale";
+
+	// https://github.com/zakaton/decent-scale-web-sdk/blob/main/script/DecentScale.js#L95
+	static private string GENERATE_MAIN_UUID(string value)
 	{
-		return String.Format("c3ff000{0}-1d8b-40fd-a56f-c7bd5d0f3370", value);
-	}
-	static private string GENERATE_SUPPORT_UUID(string value)
-	{
-		return String.Format("6e40000{0}-b5a3-f393-e0a9-e50e24dcca9e", value);
+		return String.Format("0000{0}-0000-1000-8000-00805f9b34fb", value);
 	}
 	static bool IsEqual(string uuid1, string uuid2)
 	{
 		return (uuid1.ToUpper().Equals(uuid2.ToUpper()));
 	}
 
-	private static readonly string dataServiceUUID = GENERATE_DATA_UUID("1");
-	private static readonly string tapDataCharacteristicUUID = GENERATE_DATA_UUID("5");
-	private static readonly string mouseDataCharacteristicUUID = GENERATE_DATA_UUID("6");
-	private static readonly string uiCommandCharacteristicUUID = GENERATE_DATA_UUID("9");
-	private static readonly string airGestureDataCharacteristicUUID = GENERATE_DATA_UUID("a");
+	private static readonly string mainServiceUUID = GENERATE_MAIN_UUID("fff0");
+	private static readonly string commandCharacteristicUUID = GENERATE_MAIN_UUID("36f5");
+	private static readonly string dataCharacteristicUUID = GENERATE_MAIN_UUID("fff4");
 
-	private static readonly string supportServiceUUID = GENERATE_SUPPORT_UUID("1");
-	private static readonly string tapModeCharacteristicUUID = GENERATE_SUPPORT_UUID("2");
-	private static readonly string rawSensorsCharacteristicUUID = GENERATE_SUPPORT_UUID("3");
-
-	private static string[] subscriptionCharacteristicUUIDs = { tapDataCharacteristicUUID, mouseDataCharacteristicUUID, airGestureDataCharacteristicUUID, rawSensorsCharacteristicUUID };
+	private static string[] subscriptionCharacteristicUUIDs = { dataCharacteristicUUID };
 
 	private static Dictionary<string, string> characteristicUUIDToServiceUUID = new Dictionary<string, string> {
-		{tapDataCharacteristicUUID, dataServiceUUID},
-		{mouseDataCharacteristicUUID, dataServiceUUID},
-		{uiCommandCharacteristicUUID, dataServiceUUID},
-		{airGestureDataCharacteristicUUID, dataServiceUUID},
-
-		{tapModeCharacteristicUUID, supportServiceUUID},
-		{rawSensorsCharacteristicUUID, supportServiceUUID},
+		{dataCharacteristicUUID, mainServiceUUID}
 	};
 
 	private float _timeout = 0f;
 	private States _state = States.None;
 	private string _deviceAddress;
-	private bool _foundTapDataCharacteristicUUID = false;
-	private bool _foundMouseDataCharacteristicUUID = false;
-	private bool _foundUICommandCharacteristicUUID = false;
-	private bool _foundAirGestureDataCharacteristicUUID = false;
-	private bool _foundTapModeCharacteristicUUID = false;
-	private bool _foundRawSensorsCharacteristicUUID = false;
+	private bool _foundCommandCharacteristicUUID = false;
+	private bool _foundDataCharacteristicUUID = false;
 	private bool _rssiOnly = false;
 	private int _rssi = 0;
 	void Reset()
@@ -68,17 +52,13 @@ public class TapStrapBLE : TapStrap
 
 	private void _ClearCharacteristicUUIDFlags()
 	{
-		_foundTapDataCharacteristicUUID = false;
-		_foundMouseDataCharacteristicUUID = false;
-		_foundUICommandCharacteristicUUID = false;
-		_foundAirGestureDataCharacteristicUUID = false;
-		_foundTapModeCharacteristicUUID = false;
-		_foundRawSensorsCharacteristicUUID = false;
+		_foundDataCharacteristicUUID = false;
+		_foundCommandCharacteristicUUID = false;
 	}
 
 	private bool _DidFindAllCharacteristics()
 	{
-		return _foundTapDataCharacteristicUUID && _foundMouseDataCharacteristicUUID && _foundUICommandCharacteristicUUID && _foundAirGestureDataCharacteristicUUID && _foundTapModeCharacteristicUUID && _foundTapModeCharacteristicUUID && _foundRawSensorsCharacteristicUUID;
+		return _foundDataCharacteristicUUID && _foundCommandCharacteristicUUID;
 	}
 
 	enum States
@@ -108,22 +88,6 @@ public class TapStrapBLE : TapStrap
 		{
 			Connect();
 		}
-	}
-
-	public override void _UpdateInputMode()
-	{
-		if (!IsConnected)
-		{
-			return;
-		}
-
-		byte[] data = inputModeCode;
-		logger.Log(string.Join(", ", data));
-
-		BluetoothLEHardwareInterface.WriteCharacteristic(_deviceAddress, supportServiceUUID, tapModeCharacteristicUUID, data, data.Length, true, (characteristicUUID) =>
-		{
-			BluetoothLEHardwareInterface.Log("Write Succeeded");
-		});
 	}
 
 	public override void Connect()
@@ -173,6 +137,7 @@ public class TapStrapBLE : TapStrap
 	{
 		switch (characteristicUUID)
 		{
+			/*
 			case var value when IsEqual(value, tapDataCharacteristicUUID):
 				ProcessTapData(bytes);
 				break;
@@ -185,6 +150,7 @@ public class TapStrapBLE : TapStrap
 			case var value when IsEqual(value, rawSensorsCharacteristicUUID):
 				ProcessRawData(bytes);
 				break;
+			*/
 			default:
 				StatusMessage = String.Format("uncaught characteristicUUID: {0}", characteristicUUID);
 				break;
@@ -192,11 +158,9 @@ public class TapStrapBLE : TapStrap
 	}
 
 	// Update is called once per frame
-	public void Update()
+	public override void Update()
 	{
 		base.Update();
-
-		CheckUpdateInputMode();
 
 		if (_timeout > 0f)
 		{
@@ -285,22 +249,12 @@ public class TapStrapBLE : TapStrap
 						{
 							BluetoothLEHardwareInterface.StopScan();
 
-							if (IsEqual(serviceUUID, dataServiceUUID))
+							if (IsEqual(serviceUUID, mainServiceUUID))
 							{
-								StatusMessage = "Found Data Service UUID";
+								StatusMessage = "Found main Service UUID";
 
-								_foundTapDataCharacteristicUUID = _foundTapDataCharacteristicUUID || IsEqual(characteristicUUID, tapDataCharacteristicUUID);
-								_foundMouseDataCharacteristicUUID = _foundMouseDataCharacteristicUUID || IsEqual(characteristicUUID, mouseDataCharacteristicUUID);
-								_foundUICommandCharacteristicUUID = _foundUICommandCharacteristicUUID || IsEqual(characteristicUUID, uiCommandCharacteristicUUID);
-								_foundAirGestureDataCharacteristicUUID = _foundAirGestureDataCharacteristicUUID || IsEqual(characteristicUUID, airGestureDataCharacteristicUUID);
-							}
-
-							if (IsEqual(serviceUUID, supportServiceUUID))
-							{
-								StatusMessage = "Found Support Service UUID";
-
-								_foundTapModeCharacteristicUUID = _foundTapModeCharacteristicUUID || IsEqual(characteristicUUID, tapModeCharacteristicUUID);
-								_foundRawSensorsCharacteristicUUID = _foundRawSensorsCharacteristicUUID || IsEqual(characteristicUUID, rawSensorsCharacteristicUUID);
+								_foundCommandCharacteristicUUID = _foundCommandCharacteristicUUID || IsEqual(characteristicUUID, commandCharacteristicUUID);
+								_foundDataCharacteristicUUID = _foundDataCharacteristicUUID || IsEqual(characteristicUUID, dataCharacteristicUUID);
 							}
 
 							// if we have found the characteristics that we are waiting for

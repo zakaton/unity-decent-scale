@@ -20,9 +20,6 @@ public class SelectableObjectBehavior : MonoBehaviour
 	[SerializeField]
 	private TMPro.TMP_Text loggerText;
 
-	[SerializeField]
-	private TapStrapBLEMonoBehavior TapStrapBLEMonoBehavior;
-
 	private GameObject marker;
 
 	[SerializeField]
@@ -92,7 +89,6 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{
 			eyeTrackingRay.OnObjectHoverUpdate.AddListener(OnObjectHoverUpdate);
 		}
-		TapStrapBLEMonoBehavior.tapStrap.tapEvents.tapData.AddListener(OnTapData);
 		mode = Mode.CREATING_OBJECT_POSITION;
 
 		for (int i = 0; i < objectTypeStructs.Length; i++)
@@ -234,14 +230,6 @@ public class SelectableObjectBehavior : MonoBehaviour
 		target.y = menu.transform.position.y;
 		menu.transform.LookAt(target);
 		menu.transform.RotateAround(menu.transform.position, transform.up, 180f);
-	}
-
-	private void OnTapData()
-	{
-		if (TapStrapBLEMonoBehavior.tapStrap.tapData[TapStrap.TapDataEnumeration.pointer])
-		{
-			OnPointerTap();
-		}
 	}
 
 	private void OnPointerTap()
