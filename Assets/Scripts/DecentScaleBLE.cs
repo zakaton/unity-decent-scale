@@ -16,7 +16,8 @@ public class DecentScaleBLE : DecentScale
 	// https://github.com/zakaton/decent-scale-web-sdk/blob/main/script/DecentScale.js#L95
 	static private string GENERATE_MAIN_UUID(string value)
 	{
-		return String.Format("0000{0}-0000-1000-8000-00805f9b34fb", value);
+		return value;
+		//return String.Format("0000{0}-0000-1000-8000-00805f9b34fb", value);
 	}
 	static bool IsEqual(string uuid1, string uuid2)
 	{
@@ -249,6 +250,9 @@ public class DecentScaleBLE : DecentScale
 						{
 							BluetoothLEHardwareInterface.StopScan();
 
+							StatusMessage = String.Format("{0}?{1}", serviceUUID, mainServiceUUID);
+							StatusMessage = String.Format("{0}??{1}", characteristicUUID, commandCharacteristicUUID);
+
 							if (IsEqual(serviceUUID, mainServiceUUID))
 							{
 								StatusMessage = "Found main Service UUID";
@@ -291,7 +295,7 @@ public class DecentScaleBLE : DecentScale
 							string characteristicUUID = subscriptionCharacteristicUUIDs[index];
 							string serviceUUID = characteristicUUIDToServiceUUID[characteristicUUID];
 
-							StatusMessage = String.Format("suscribing to #{0}{1}", index, characteristicUUID);
+							StatusMessage = String.Format("suscribing to #{0}: {1}", index, characteristicUUID);
 							BluetoothLEHardwareInterface.SubscribeCharacteristicWithDeviceAddress(_deviceAddress, serviceUUID, characteristicUUID, (notifyAddress, notifyCharacteristic) =>
 					{
 						_state = States.None;
