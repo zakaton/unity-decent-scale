@@ -236,7 +236,7 @@ public class DecentScale
 		public UnityEvent<string> firmwareVersion = new();
 		public UnityEvent<int> battery = new();
 		public UnityEvent<bool> isUSB = new();
-		public UnityEvent<int, WeightTimestamp> weight = new();
+		public UnityEvent<float, bool, WeightTimestamp> weight = new();
 		public UnityEvent<int> tare = new();
 		public UnityEvent<DisplayWeightType> weightType = new();
 		public UnityEvent<ButtonType, ButtonTapType> buttonTap = new();
@@ -288,7 +288,10 @@ public class DecentScale
 		prefix = 0x03,
 		led = 0x0a,
 		timer = 0x0b,
-		tare = 0x0f
+		tare = 0x0f,
+		stableWeight = 0xce,
+		unstableWeight = 0xca,
+		buttonTap = 0xaa
 	}
 	public byte XORNumbers(List<byte> numbers)
 	{
@@ -370,12 +373,28 @@ public class DecentScale
 		sendCommand(commandData);
 	}
 
-
-	public void ProcessWeightData(byte[] bytes)
+	public void ProcessWeightData(byte[] bytes, int byteOffset = 0)
 	{
+		isStable = bytes[byteOffset++] == (int)Command.stableWeight;
 		StatusMessage = String.Format("ProcessWeightData {0}", bytes.Length);
-		uint byteOffset = 0;
-
-		//decentScaleEvents.weight.Invoke();
+		// FILL
+		decentScaleEvents.weight.Invoke(weight, isStable, weightTimestamp);
+	}
+	public void ProcessLEDData(byte[] bytes, int byteOffset = 0)
+	{
+		StatusMessage = String.Format("ProcessLEDData {0}", bytes.Length);
+		// FILL
+	}
+	public void ProcessButtonTapData(byte[] bytes, int byteOffset = 0)
+	{
+		StatusMessage = String.Format("ProcessButtonTapData {0}", bytes.Length);
+		// FILL
+		//decentScaleEvents.buttonTap.Invoke();
+	}
+	public void ProcessTareData(byte[] bytes, int byteOffset = 0)
+	{
+		StatusMessage = String.Format("ProcessTareData {0}", bytes.Length);
+		// FILL
+		//decentScaleEvents.tare.Invoke();
 	}
 }

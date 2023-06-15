@@ -1,3 +1,2 @@
 ﻿parse data
-	get message type
 	parse all data types

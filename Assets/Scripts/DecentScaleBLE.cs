@@ -136,26 +136,34 @@ public class DecentScaleBLE : DecentScale
 
 	private void OnData(string characteristicUUID, byte[] bytes)
 	{
-		// FILL
-		switch (characteristicUUID)
+		if (characteristicUUID == dataCharacteristicUUID)
 		{
-			/*
-			case var value when IsEqual(value, tapDataCharacteristicUUID):
-				ProcessTapData(bytes);
-				break;
-			case var value when IsEqual(value, mouseDataCharacteristicUUID):
-				ProcessMouseData(bytes);
-				break;
-			case var value when IsEqual(value, airGestureDataCharacteristicUUID):
-				ProcessAirGestureData(bytes);
-				break;
-			case var value when IsEqual(value, rawSensorsCharacteristicUUID):
-				ProcessRawData(bytes);
-				break;
-			*/
-			default:
-				StatusMessage = String.Format("uncaught characteristicUUID: {0}", characteristicUUID);
-				break;
+			int byteOffset = 0;
+			if (bytes[0] == 0)
+			{
+				byteOffset += 2;
+			}
+			var command = (Command)bytes[byteOffset++];
+			switch (command)
+			{
+				case Command.stableWeight:
+				case Command.unstableWeight:
+					byteOffset--;
+					ProcessWeightData(bytes, byteOffset);
+					break;
+				case Command.led:
+					ProcessLEDData(bytes, byteOffset);
+					break;
+				case Command.buttonTap:
+					ProcessButtonTapData(bytes, byteOffset);
+					break;
+				case Command.tare:
+					ProcessTareData(bytes, byteOffset);
+					break;
+				default:
+					StatusMessage = String.Format("uncaught characteristicUUID: {0}", characteristicUUID);
+					break;
+			}
 		}
 	}
 
@@ -376,11 +384,11 @@ public class DecentScaleBLE : DecentScale
 							{
 								StatusMessage = "Device disconnected";
 								BluetoothLEHardwareInterface.DeInitialize(() =>
-															{
-																IsConnected = false;
-																_state = States.None;
-																connectionEvents.onDisconnect.Invoke();
-															});
+									{
+										IsConnected = false;
+										_state = States.None;
+										connectionEvents.onDisconnect.Invoke();
+									});
 							});
 						}
 						else
