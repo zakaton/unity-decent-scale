@@ -351,6 +351,16 @@ MonoBehaviour:
     IsConnecting: 0
     autoConnect: 1
     enableLogging: 1
+    firmwareVersion: 
+    battery: 0
+    isUSB: 0
+    weight: 0
+    isStable: 1
+    weightTimestamp:
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+    displayWeightType: 0
     connectionEvents:
       onConnect:
         m_PersistentCalls:
@@ -365,7 +375,25 @@ MonoBehaviour:
         m_PersistentCalls:
           m_Calls: []
     decentScaleEvents:
-      weightData:
+      firmwareVersion:
+        m_PersistentCalls:
+          m_Calls: []
+      battery:
+        m_PersistentCalls:
+          m_Calls: []
+      isUSB:
+        m_PersistentCalls:
+          m_Calls: []
+      weight:
+        m_PersistentCalls:
+          m_Calls: []
+      tare:
+        m_PersistentCalls:
+          m_Calls: []
+      weightType:
+        m_PersistentCalls:
+          m_Calls: []
+      buttonTap:
         m_PersistentCalls:
           m_Calls: []
 --- !u!1 &1048690259

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 /*
     TODO
-        *
+			*
 */
 
 [Serializable]
@@ -136,6 +136,7 @@ public class DecentScaleBLE : DecentScale
 
 	private void OnData(string characteristicUUID, byte[] bytes)
 	{
+		// FILL
 		switch (characteristicUUID)
 		{
 			/*
@@ -155,6 +156,37 @@ public class DecentScaleBLE : DecentScale
 			default:
 				StatusMessage = String.Format("uncaught characteristicUUID: {0}", characteristicUUID);
 				break;
+		}
+	}
+
+	private bool isSendingCommand = false;
+	public override void sendCommand(List<byte> commandData, bool overrideSend = false)
+	{
+		if (IsConnected)
+		{
+			if (!overrideSend && (isSendingCommand || commands.Count > 0))
+			{
+				StatusMessage = "Pushing command to buffer...";
+				commands.Add(commandData);
+			}
+			else
+			{
+				isSendingCommand = true;
+				formatCommandData(commandData);
+				var data = commandData.ToArray();
+				BluetoothLEHardwareInterface.WriteCharacteristic(_deviceAddress, mainServiceUUID, commandCharacteristicUUID, data, data.Length, true, (characteristicUUID) =>
+				{
+					BluetoothLEHardwareInterface.Log("Write Succeeded");
+					isSendingCommand = false;
+					if (commands.Count > 0)
+					{
+						var nextCommand = commands[0];
+						commands.Remove(nextCommand);
+						StatusMessage = "sending next command...";
+						sendCommand(nextCommand, true);
+					}
+				});
+			}
 		}
 	}
 

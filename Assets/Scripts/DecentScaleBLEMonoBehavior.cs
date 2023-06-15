@@ -4,7 +4,7 @@ using UnityEngine;
 
 /*
     TODO
-        
+			*
 */
 
 public class DecentScaleBLEMonoBehavior : MonoBehaviour
