@@ -136,29 +136,28 @@ public class DecentScaleBLE : DecentScale
 
 	private void OnData(string characteristicUUID, byte[] bytes)
 	{
-		if (characteristicUUID == dataCharacteristicUUID)
+		if (IsEqual(characteristicUUID, dataCharacteristicUUID))
 		{
 			int byteOffset = 0;
 			if (bytes[0] == 0)
 			{
 				byteOffset += 2;
 			}
-			var command = (Command)bytes[byteOffset++];
+			var command = (Command)bytes[byteOffset + 1];
 			switch (command)
 			{
-				case Command.stableWeight:
-				case Command.unstableWeight:
-					byteOffset--;
-					ProcessWeightData(bytes, byteOffset);
-					break;
 				case Command.led:
 					ProcessLEDData(bytes, byteOffset);
 					break;
-				case Command.buttonTap:
-					ProcessButtonTapData(bytes, byteOffset);
+				case Command.stableWeight:
+				case Command.unstableWeight:
+					ProcessWeightData(bytes, byteOffset);
 					break;
 				case Command.tare:
 					ProcessTareData(bytes, byteOffset);
+					break;
+				case Command.buttonTap:
+					ProcessButtonTapData(bytes, byteOffset);
 					break;
 				default:
 					StatusMessage = String.Format("uncaught characteristicUUID: {0}", characteristicUUID);
@@ -290,9 +289,6 @@ public class DecentScaleBLE : DecentScale
 						{
 							BluetoothLEHardwareInterface.StopScan();
 
-							StatusMessage = String.Format("{0}?{1}", serviceUUID, mainServiceUUID);
-							StatusMessage = String.Format("{0}??{1}", characteristicUUID, commandCharacteristicUUID);
-
 							if (IsEqual(serviceUUID, mainServiceUUID))
 							{
 								StatusMessage = "Found main Service UUID";
@@ -308,9 +304,6 @@ public class DecentScaleBLE : DecentScale
 							if (!IsConnected && _DidFindAllCharacteristics())
 							{
 								StatusMessage = "Found all Characteristics!";
-								IsConnected = true;
-								IsConnecting = false;
-								connectionEvents.onConnect.Invoke();
 								SetState(States.RequestMTU, 2f);
 							}
 						});
@@ -361,6 +354,9 @@ public class DecentScaleBLE : DecentScale
 						}
 
 						StatusMessage = "Finished Subscribing to characteristics!";
+						IsConnected = true;
+						IsConnecting = false;
+						connectionEvents.onConnect.Invoke();
 						break;
 
 					case States.Unsubscribe:

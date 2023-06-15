@@ -14,36 +14,36 @@ using Unity.VisualScripting;
 [Serializable]
 public class DecentScale
 {
-	private UInt16 ToUInt16(byte[] bytes, int byteOffset)
+	private UInt16 ToUInt16(byte[] bytes, int byteOffset, bool littleEndian = false)
 	{
 		UInt16 value = BitConverter.ToUInt16(bytes, byteOffset);
-		if (!BitConverter.IsLittleEndian)
+		if (littleEndian != BitConverter.IsLittleEndian)
 		{
 			value = BinaryPrimitives.ReverseEndianness(value);
 		}
 		return value;
 	}
-	private Int16 ToInt16(byte[] bytes, int byteOffset)
+	private Int16 ToInt16(byte[] bytes, int byteOffset, bool littleEndian = false)
 	{
 		Int16 value = BitConverter.ToInt16(bytes, byteOffset);
-		if (!BitConverter.IsLittleEndian)
+		if (littleEndian != BitConverter.IsLittleEndian)
 		{
 			value = BinaryPrimitives.ReverseEndianness(value);
 		}
 		return value;
 	}
-	private UInt32 ToUInt32(byte[] bytes, int byteOffset)
+	private UInt32 ToUInt32(byte[] bytes, int byteOffset, bool littleEndian = false)
 	{
 		UInt32 value = BitConverter.ToUInt32(bytes, byteOffset);
-		if (!BitConverter.IsLittleEndian)
+		if (littleEndian != !BitConverter.IsLittleEndian)
 		{
 			value = BinaryPrimitives.ReverseEndianness(value);
 		}
 		return value;
 	}
-	private double ToDouble(byte[] bytes, int byteOffset)
+	private double ToDouble(byte[] bytes, int byteOffset, bool littleEndian = false)
 	{
-		if (!BitConverter.IsLittleEndian)
+		if (littleEndian != BitConverter.IsLittleEndian)
 		{
 			byte[] _bytes = new byte[8];
 			for (int i = 0; i < _bytes.Length; i++)
@@ -57,9 +57,9 @@ public class DecentScale
 			return BitConverter.ToDouble(bytes, byteOffset);
 		}
 	}
-	private float ToSingle(byte[] bytes, int byteOffset)
+	private float ToSingle(byte[] bytes, int byteOffset, bool littleEndian = false)
 	{
-		if (!BitConverter.IsLittleEndian)
+		if (littleEndian != BitConverter.IsLittleEndian)
 		{
 			byte[] _bytes = new byte[4];
 			for (int i = 0; i < _bytes.Length; i++)
@@ -169,6 +169,20 @@ public class DecentScale
 		}
 	}
 
+	[SerializeField]
+	public bool powerOff = false;
+	private void checkPowerOff()
+	{
+		if (powerOff)
+		{
+			powerOff = false;
+			PowerOff();
+		}
+	}
+
+	[SerializeField]
+	public int tareCounter = 0;
+
 	public Logger logger = new Logger(Debug.unityLogger.logHandler);
 	[SerializeField]
 	public bool enableLogging = true;
@@ -187,10 +201,14 @@ public class DecentScale
 
 	[SerializeField]
 	public string firmwareVersion;
+	[HideInInspector]
+	private bool checkedFirmwareVersion = false;
 	[SerializeField]
 	public int battery = 0;
 	[SerializeField]
 	public bool isUSB = false;
+	[HideInInspector]
+	private bool checkedIsUSB = false;
 
 	[SerializeField]
 	public float weight = 0;
@@ -207,7 +225,7 @@ public class DecentScale
 		{
 			string minutesString = minutes.ToString().PadLeft(2, '0');
 			string secondsString = seconds.ToString().PadLeft(2, '0');
-			string millisecondsString = milliseconds.ToString().PadLeft(4, '0');
+			string millisecondsString = milliseconds.ToString().PadLeft(3, '0');
 			return String.Format("{0}:{1}:{2}", minutesString, secondsString, millisecondsString);
 		}
 	}
@@ -216,6 +234,8 @@ public class DecentScale
 	public enum DisplayWeightType { grams, ounces };
 	[SerializeField]
 	public DisplayWeightType displayWeightType = DisplayWeightType.grams;
+	[HideInInspector]
+	private bool checkedDisplayWeightType = false;
 
 	public enum ButtonType { left = 1, right };
 	public enum ButtonTapType { shortPress = 1, longPress };
@@ -238,7 +258,7 @@ public class DecentScale
 		public UnityEvent<bool> isUSB = new();
 		public UnityEvent<float, bool, WeightTimestamp> weight = new();
 		public UnityEvent<int> tare = new();
-		public UnityEvent<DisplayWeightType> weightType = new();
+		public UnityEvent<DisplayWeightType> displayWeightType = new();
 		public UnityEvent<ButtonType, ButtonTapType> buttonTap = new();
 	}
 	[SerializeField]
@@ -274,6 +294,8 @@ public class DecentScale
 		checkResetTimer();
 
 		checkTare();
+
+		checkPowerOff();
 	}
 	public virtual void Connect() { }
 	public virtual void Disconnect() { }
@@ -373,28 +395,88 @@ public class DecentScale
 		sendCommand(commandData);
 	}
 
-	public void ProcessWeightData(byte[] bytes, int byteOffset = 0)
-	{
-		isStable = bytes[byteOffset++] == (int)Command.stableWeight;
-		StatusMessage = String.Format("ProcessWeightData {0}", bytes.Length);
-		// FILL
-		decentScaleEvents.weight.Invoke(weight, isStable, weightTimestamp);
-	}
 	public void ProcessLEDData(byte[] bytes, int byteOffset = 0)
 	{
-		StatusMessage = String.Format("ProcessLEDData {0}", bytes.Length);
-		// FILL
+		//StatusMessage = String.Format("ProcessLEDData {0}", bytes.Length);
+
+		var _battery = bytes[byteOffset + 4];
+		var _isUSB = _battery == USB_BATTERY_ENUM;
+		if (_isUSB)
+		{
+			battery = 100;
+		}
+		else
+		{
+			battery = _battery;
+		}
+		if (!checkedIsUSB || isUSB != _isUSB)
+		{
+			checkedIsUSB = true;
+			isUSB = _isUSB;
+			StatusMessage = String.Format("isUSB: {0}", isUSB);
+			decentScaleEvents.isUSB.Invoke(isUSB);
+			if (isUSB)
+			{
+				StatusMessage = String.Format("usb battery: {0}", battery);
+				decentScaleEvents.battery.Invoke(battery);
+			}
+		}
+		if (!isUSB)
+		{
+			StatusMessage = String.Format("battery: {0}", battery);
+			decentScaleEvents.battery.Invoke(battery);
+		}
+
+		var _displayWeightType = (DisplayWeightType)bytes[byteOffset + 3];
+		if (!checkedDisplayWeightType || displayWeightType != _displayWeightType)
+		{
+			checkedDisplayWeightType = true;
+			displayWeightType = _displayWeightType;
+			StatusMessage = String.Format("display weight type: {0}", displayWeightType.ToString());
+			decentScaleEvents.displayWeightType.Invoke(displayWeightType);
+		}
+
+		var _firmwareVersion = FIRMWARE_ENUM[bytes[byteOffset + 5]];
+		if (!checkedFirmwareVersion || firmwareVersion != _firmwareVersion)
+		{
+			checkedFirmwareVersion = true;
+			firmwareVersion = _firmwareVersion;
+			StatusMessage = String.Format("firmware version: {0}", firmwareVersion);
+			decentScaleEvents.firmwareVersion.Invoke(firmwareVersion);
+		}
+	}
+	public void ProcessWeightData(byte[] bytes, int byteOffset = 0)
+	{
+		//StatusMessage = String.Format("ProcessWeightData {0}", bytes.Length);
+		isStable = bytes[byteOffset + 1] == (int)Command.stableWeight;
+		weight = (float)ToInt16(bytes, byteOffset + 2, false);
+		var _byteLength = bytes.Length - byteOffset;
+		if (_byteLength == 7)
+		{
+			// FILL - add "change"
+		}
+		else if (_byteLength == 10)
+		{
+			weightTimestamp.minutes = bytes[byteOffset + 4];
+			weightTimestamp.seconds = bytes[byteOffset + 5];
+			weightTimestamp.milliseconds = bytes[byteOffset + 6] * 100;
+		}
+		//StatusMessage = String.Format("weight {0} grams, {1}, {2}", weight, isStable ? "stable" : "unstable", weightTimestamp.ToString());
+		decentScaleEvents.weight.Invoke(weight, isStable, weightTimestamp);
 	}
 	public void ProcessButtonTapData(byte[] bytes, int byteOffset = 0)
 	{
-		StatusMessage = String.Format("ProcessButtonTapData {0}", bytes.Length);
-		// FILL
-		//decentScaleEvents.buttonTap.Invoke();
+		//StatusMessage = String.Format("ProcessButtonTapData {0}", bytes.Length);
+		var button = (ButtonType)bytes[byteOffset + 2];
+		var buttonTapType = (ButtonTapType)bytes[byteOffset + 3];
+		StatusMessage = String.Format("tap {0}: {1}", button.ToString(), buttonTapType.ToString());
+		decentScaleEvents.buttonTap.Invoke(button, buttonTapType);
 	}
 	public void ProcessTareData(byte[] bytes, int byteOffset = 0)
 	{
-		StatusMessage = String.Format("ProcessTareData {0}", bytes.Length);
-		// FILL
-		//decentScaleEvents.tare.Invoke();
+		//StatusMessage = String.Format("ProcessTareData {0}", bytes.Length);
+		tareCounter = bytes[byteOffset + 2];
+		StatusMessage = String.Format("tare {0}", tareCounter);
+		decentScaleEvents.tare.Invoke(tareCounter);
 	}
 }

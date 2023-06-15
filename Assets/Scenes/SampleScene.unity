@@ -346,10 +346,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   decentScale:
-    loggerText: {fileID: 0}
+    loggerText: {fileID: 1048690260}
     IsConnected: 0
     IsConnecting: 0
     autoConnect: 1
+    showWeight: 0
+    showTimer: 0
+    showGrams: 1
+    startTimer: 0
+    resetTimer: 0
+    stopTimer: 0
+    tare: 0
+    tareCounter: 0
     enableLogging: 1
     firmwareVersion: 
     battery: 0
@@ -390,7 +398,7 @@ MonoBehaviour:
       tare:
         m_PersistentCalls:
           m_Calls: []
-      weightType:
+      displayWeightType:
         m_PersistentCalls:
           m_Calls: []
       buttonTap:

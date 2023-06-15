@@ -1,2 +1,1 @@
-﻿parse data
-	parse all data types
+﻿
