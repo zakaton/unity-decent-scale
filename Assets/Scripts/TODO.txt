@@ -1,1 +1,7 @@
-﻿
+﻿demo
+	transform scale
+	show menu when looking at scale
+	select oatmeal
+	"continue" when placing bowl
+	add oats/milk/blueberries
+	display macros

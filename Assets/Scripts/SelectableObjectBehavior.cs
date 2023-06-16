@@ -23,11 +23,9 @@ public class SelectableObjectBehavior : MonoBehaviour
 	private GameObject marker;
 
 	[SerializeField]
-	private GameObject createMenu;
+	private GameObject mainMenu;
 	[SerializeField]
-	private GameObject editMenu;
-	[SerializeField]
-	private GameObject colorMenu;
+	private GameObject recipeMenu;
 
 	[SerializeField]
 	private Camera _camera;
@@ -37,14 +35,10 @@ public class SelectableObjectBehavior : MonoBehaviour
 	public enum Mode
 	{
 		NONE,
-		CREATING_OBJECT_POSITION,
-		CREATING_OBJECT,
 		SELECTING_OBJECT,
 		SELECTED_OBJECT,
 		MOVING_OBJECT,
 		ROTATING_OBJECT,
-		SCALING_OBJECT,
-		COLORING_OBJECT
 	}
 	private Mode _mode = Mode.NONE;
 	public Mode mode
@@ -89,7 +83,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{
 			eyeTrackingRay.OnObjectHoverUpdate.AddListener(OnObjectHoverUpdate);
 		}
-		mode = Mode.CREATING_OBJECT_POSITION;
+		mode = Mode.NONE;
 
 		for (int i = 0; i < objectTypeStructs.Length; i++)
 		{
@@ -125,13 +119,6 @@ public class SelectableObjectBehavior : MonoBehaviour
 			{
 				case Mode.MOVING_OBJECT:
 					parent.position = marker.transform.position;
-					break;
-				case Mode.SCALING_OBJECT:
-					var distance = (parent.position - marker.transform.position).magnitude;
-					var scaleScalar = (float)Math.Clamp(distance, 0.1, 0.5);
-					scaleScalar *= 7.5f;
-					var scale = new Vector3(scaleScalar, scaleScalar, scaleScalar);
-					parent.localScale = selectedEyeInteractable._scale = scale;
 					break;
 				case Mode.ROTATING_OBJECT:
 					var vector3 = (parent.position - marker.transform.position);
@@ -217,8 +204,8 @@ public class SelectableObjectBehavior : MonoBehaviour
 	}
 	private void UpdateMenuTransform(GameObject menu)
 	{
-		Vector3 position = (menu == editMenu || menu == colorMenu) ? selectedEyeInteractable.transform.position : marker.transform.position;
-		if (menu == editMenu || menu == colorMenu)
+		Vector3 position = (menu == mainMenu) ? selectedEyeInteractable.transform.position : marker.transform.position;
+		if (menu == mainMenu)
 		{
 			position += _camera.transform.right * 0.1f;
 			position += _camera.transform.up * 0.0f;
@@ -238,17 +225,6 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{
 			case Mode.NONE:
 				break;
-			case Mode.CREATING_OBJECT_POSITION:
-				mode = Mode.CREATING_OBJECT;
-				break;
-			case Mode.CREATING_OBJECT:
-				if (hoveredButton != null)
-				{
-					var createMenuText = hoveredButton.GetComponentInChildren<TMPro.TMP_Text>();
-					OnCreateMenuTap(createMenuText.text);
-					hoveredButton = null;
-				}
-				break;
 			case Mode.SELECTING_OBJECT:
 				var closestSelectedObject = GetClosestHoveredObject();
 				if (closestSelectedObject != null)
@@ -259,26 +235,16 @@ public class SelectableObjectBehavior : MonoBehaviour
 			case Mode.SELECTED_OBJECT:
 				if (hoveredButton != null)
 				{
-					var editMenuText = hoveredButton.GetComponentInChildren<TMPro.TMP_Text>();
-					OnEditMenuTap(editMenuText.text);
+					var mainMenuText = hoveredButton.GetComponentInChildren<TMPro.TMP_Text>();
+					OnMainMenuTap(mainMenuText.text);
 					hoveredButton = null;
 				}
 				break;
 			case Mode.MOVING_OBJECT:
 				mode = Mode.SELECTING_OBJECT;
 				break;
-			case Mode.SCALING_OBJECT:
-				mode = Mode.SELECTING_OBJECT;
-				break;
 			case Mode.ROTATING_OBJECT:
 				mode = Mode.SELECTING_OBJECT;
-				break;
-			case Mode.COLORING_OBJECT:
-				if (hoveredButton != null)
-				{
-					var colorMenuText = hoveredButton.GetComponentInChildren<TMPro.TMP_Text>();
-					OnColorMenuTap(colorMenuText.text);
-				}
 				break;
 		}
 	}
@@ -304,44 +270,10 @@ public class SelectableObjectBehavior : MonoBehaviour
 
 	private void OnMiddleTap()
 	{
-		switch (mode)
-		{
-			case Mode.NONE:
-			case Mode.SELECTING_OBJECT:
-				mode = Mode.CREATING_OBJECT_POSITION;
-				break;
-			case Mode.CREATING_OBJECT_POSITION:
-				mode = Mode.SELECTING_OBJECT;
-				break;
-			default:
-				mode = Mode.SELECTING_OBJECT;
-				break;
-		}
+
 	}
 
-	private void OnCreateMenuTap(string text)
-	{
-		loggerText.text = String.Format("create: {0}", text);
-		switch (text)
-		{
-			case "cube":
-				CreateObject(ObjectType.cube);
-				break;
-			case "sphere":
-				CreateObject(ObjectType.sphere);
-				break;
-			case "capsule":
-				CreateObject(ObjectType.capsule);
-				break;
-			case "cylinder":
-				CreateObject(ObjectType.cylinder);
-				break;
-			case "close":
-				mode = Mode.CREATING_OBJECT_POSITION;
-				break;
-		}
-	}
-	private void OnEditMenuTap(string text)
+	private void OnMainMenuTap(string text)
 	{
 		loggerText.text = String.Format("edit: {0}", text);
 		switch (text)
@@ -349,151 +281,57 @@ public class SelectableObjectBehavior : MonoBehaviour
 			case "move":
 				mode = Mode.MOVING_OBJECT;
 				break;
-			case "scale":
-				mode = Mode.SCALING_OBJECT;
-				break;
 			case "rotate":
 				mode = Mode.ROTATING_OBJECT;
 				break;
-			case "color":
-				mode = Mode.COLORING_OBJECT;
+			case "tare":
+				// FILL
 				break;
-			case "copy":
-				if (selectedEyeInteractable != null)
-				{
-					var selectedGameObject = Instantiate(selectedEyeInteractable.transform.parent.gameObject, transform);
-					var position = selectedGameObject.transform.position;
-					var scale = selectedGameObject.transform.localScale;
-					position.x += 0.3F;
-					selectedGameObject.transform.position = position;
-					selectedGameObject.transform.localScale = scale;
-					selectedEyeInteractable = selectedGameObject.GetComponentInChildren<EyeInteractable>();
-					selectedEyeInteractable._scale = scale;
-					selectedEyeInteractable.isLarge = false;
-					selectedEyeInteractable.IsHovered = false;
-					IsWaitingForObjectToInstantiate = true;
-					mode = Mode.MOVING_OBJECT;
-				}
-				break;
-			case "delete":
-				if (selectedEyeInteractable != null)
-				{
-					var gameObjectToDestroy = selectedEyeInteractable.transform.parent.gameObject;
-					selectedEyeInteractable.ShouldIgnore = true;
-					selectedEyeInteractable.deleted = true;
-					eyeInteractables.Remove(selectedEyeInteractable);
-					selectedEyeInteractable = null;
-					Destroy(gameObjectToDestroy);
-					mode = Mode.SELECTING_OBJECT;
-				}
+			case "recipe":
+				// FILL
 				break;
 			case "close":
 				mode = Mode.SELECTING_OBJECT;
 				break;
 		}
-	}
-
-	private void OnColorMenuTap(string text)
-	{
-		loggerText.text = String.Format("color: {0}", text);
-		var meshRenderer = selectedEyeInteractable.GetComponent<MeshRenderer>();
-
-		switch (text)
-		{
-			case "white":
-				meshRenderer.material.color = Color.white;
-				break;
-			case "black":
-				meshRenderer.material.color = Color.black;
-				break;
-			case "red":
-				meshRenderer.material.color = Color.red;
-				break;
-			case "blue":
-				meshRenderer.material.color = Color.blue;
-				break;
-			case "green":
-				meshRenderer.material.color = Color.green;
-				break;
-			case "yellow":
-				meshRenderer.material.color = Color.yellow;
-				break;
-			case "back":
-				mode = Mode.SELECTED_OBJECT;
-				break;
-			case "close":
-				mode = Mode.SELECTING_OBJECT;
-				break;
-		}
-	}
-
-	private void CreateObject(ObjectType objectType)
-	{
-		var prefab = objectTypes[objectType];
-		var position = markerPosition;
-		var rotation = new Quaternion();
-		var newObject = Instantiate(prefab, position, rotation, transform);
-		selectedEyeInteractable = newObject.GetComponentInChildren<EyeInteractable>();
-		IsWaitingForObjectToInstantiate = true;
-		mode = Mode.SELECTED_OBJECT;
 	}
 
 	private void OnModeUpdate()
 	{
-		bool shouldShowCreateMenu = false;
-		bool shouldShowEditMenu = false;
-		bool shouldShowColorMenu = false;
+		bool shouldShowMainMenu = false;
+		bool shouldShowRecipeMenu = false;
 		bool shouldShowMarker = false;
 
 		switch (mode)
 		{
 			case Mode.NONE:
 				break;
-			case Mode.CREATING_OBJECT_POSITION:
-				shouldShowMarker = true;
-				break;
-			case Mode.CREATING_OBJECT:
-				shouldShowCreateMenu = true;
-				break;
 			case Mode.SELECTING_OBJECT:
 				break;
 			case Mode.SELECTED_OBJECT:
-				shouldShowEditMenu = true;
+				shouldShowMainMenu = true;
 				break;
 			case Mode.MOVING_OBJECT:
 				break;
-			case Mode.SCALING_OBJECT:
-				break;
 			case Mode.ROTATING_OBJECT:
-				break;
-			case Mode.COLORING_OBJECT:
-				shouldShowColorMenu = true;
 				break;
 		}
 
-		if (shouldShowCreateMenu != createMenu.activeSelf)
+		if (shouldShowMainMenu != mainMenu.activeSelf)
 		{
-			if (shouldShowCreateMenu)
+			if (shouldShowMainMenu)
 			{
-				UpdateMenuTransform(createMenu);
+				UpdateMenuTransform(mainMenu);
 			}
-			createMenu.SetActive(shouldShowCreateMenu);
+			mainMenu.SetActive(shouldShowMainMenu);
 		}
-		if (shouldShowEditMenu != editMenu.activeSelf)
+		if (shouldShowRecipeMenu != recipeMenu.activeSelf)
 		{
-			if (shouldShowEditMenu)
+			if (shouldShowRecipeMenu)
 			{
-				UpdateMenuTransform(editMenu);
+				UpdateMenuTransform(recipeMenu);
 			}
-			editMenu.SetActive(shouldShowEditMenu);
-		}
-		if (shouldShowColorMenu != colorMenu.activeSelf)
-		{
-			if (shouldShowColorMenu)
-			{
-				UpdateMenuTransform(colorMenu);
-			}
-			colorMenu.SetActive(shouldShowColorMenu);
+			recipeMenu.SetActive(shouldShowRecipeMenu);
 		}
 
 		if (shouldShowMarker != marker.activeSelf)

@@ -1,0 +1,201 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &9157378395466565060
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3377118476380081973}
+  m_Layer: 0
+  m_Name: DecentScale
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3377118476380081973
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9157378395466565060}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8408415944124115198}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &2673979820561514282
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 3377118476380081973}
+    m_Modifications:
+    - target: {fileID: 2562230537398256632, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_Size.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2562230537398256632, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_Size.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2562230537398256632, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_Size.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2837804975382108159, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_Name
+      value: DecentScaleMesh
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.159
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.035
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.104
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.025
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+--- !u!1 &178467145143625941 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2837804975382108159, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+  m_PrefabInstance: {fileID: 2673979820561514282}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2333120109352198419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 178467145143625941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14a7d396836f4497880069dfe63ea3b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  decentScale:
+    loggerText: {fileID: 0}
+    IsConnected: 0
+    IsConnecting: 0
+    autoConnect: 1
+    showWeight: 0
+    showTimer: 0
+    showGrams: 1
+    startTimer: 0
+    resetTimer: 0
+    stopTimer: 0
+    tare: 0
+    powerOff: 0
+    tareCounter: 0
+    enableLogging: 1
+    firmwareVersion: 
+    battery: 0
+    isUSB: 0
+    weight: 0
+    isStable: 1
+    weightTimestamp:
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+    displayWeightType: 0
+    connectionEvents:
+      onConnect:
+        m_PersistentCalls:
+          m_Calls: []
+      onConnecting:
+        m_PersistentCalls:
+          m_Calls: []
+      onStopConnecting:
+        m_PersistentCalls:
+          m_Calls: []
+      onDisconnect:
+        m_PersistentCalls:
+          m_Calls: []
+    decentScaleEvents:
+      firmwareVersion:
+        m_PersistentCalls:
+          m_Calls: []
+      battery:
+        m_PersistentCalls:
+          m_Calls: []
+      isUSB:
+        m_PersistentCalls:
+          m_Calls: []
+      weight:
+        m_PersistentCalls:
+          m_Calls: []
+      tare:
+        m_PersistentCalls:
+          m_Calls: []
+      displayWeightType:
+        m_PersistentCalls:
+          m_Calls: []
+      buttonTap:
+        m_PersistentCalls:
+          m_Calls: []
+--- !u!4 &8408415944124115198 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5884889400111667156, guid: 712c6bbbf77d249dbb5f75a4777f8aa1, type: 3}
+  m_PrefabInstance: {fileID: 2673979820561514282}
+  m_PrefabAsset: {fileID: 0}
