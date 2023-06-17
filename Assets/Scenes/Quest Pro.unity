@@ -4652,6 +4652,10 @@ PrefabInstance:
       propertyPath: decentScale.autoConnect
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3055640554104443103, guid: d2f4149a5272749f29ece2777ec92efb, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.0232
+      objectReference: {fileID: 0}
     - target: {fileID: 3377118476380081973, guid: d2f4149a5272749f29ece2777ec92efb, type: 3}
       propertyPath: m_RootOrder
       value: 10
@@ -4700,6 +4704,22 @@ PrefabInstance:
       propertyPath: decentScale.loggerText
       value: 
       objectReference: {fileID: 733584766}
+    - target: {fileID: 5958497261062462333, guid: d2f4149a5272749f29ece2777ec92efb, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 5958497261062462333, guid: d2f4149a5272749f29ece2777ec92efb, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.015
+      objectReference: {fileID: 0}
+    - target: {fileID: 8579859456877071715, guid: d2f4149a5272749f29ece2777ec92efb, type: 3}
+      propertyPath: m_Name
+      value: DecentScaleDisplay
+      objectReference: {fileID: 0}
+    - target: {fileID: 8651197891953993158, guid: d2f4149a5272749f29ece2777ec92efb, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.0288
+      objectReference: {fileID: 0}
     - target: {fileID: 9157378395466565060, guid: d2f4149a5272749f29ece2777ec92efb, type: 3}
       propertyPath: m_Name
       value: DecentScale

@@ -1,4 +1,7 @@
 ﻿demo
-	display weight/macros
-	measuring UI (display macros)
-	"continue" UI to tare for next ingredient
+	display weight/macros/calories
+	rotate display to face user
+	SetIngredient()
+		tares scale
+		goes to next ingredient if stable for 1 second
+		goes to "none" if done (keeps UI in view)

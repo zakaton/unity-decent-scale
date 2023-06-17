@@ -39,6 +39,11 @@ public class SelectableObjectBehavior : MonoBehaviour
 	private GameObject marker;
 	private MeshRenderer markerMeshRenderer;
 
+	private GameObject display;
+	private TMPro.TMP_Text decentScaleWeightText;
+	private TMPro.TMP_Text decentScaleMacrosText;
+	private TMPro.TMP_Text decentScaleCaloriesText;
+
 	[SerializeField]
 	private GameObject mainMenu;
 	[SerializeField]
@@ -57,6 +62,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		MOVING_OBJECT,
 		ROTATING_OBJECT,
 		SELECTING_RECIPE,
+		WEIGHING_INGREDIENT
 	}
 	private Mode _mode = Mode.NONE;
 	public Mode mode
@@ -76,6 +82,57 @@ public class SelectableObjectBehavior : MonoBehaviour
 		}
 	}
 
+	private string _currentRecipe;
+	private string currentRecipe
+	{
+		get
+		{
+			return _currentRecipe;
+		}
+		set
+		{
+			if (_currentRecipe != value)
+			{
+				_currentRecipe = value;
+				OnRecipeUpdate();
+			}
+		}
+	}
+	private string _currentIngredient;
+	private string currentIngredient
+	{
+		get
+		{
+			return _currentIngredient;
+		}
+		set
+		{
+			if (_currentIngredient != value)
+			{
+				_currentIngredient = value;
+				OnIngredientUpdate();
+			}
+		}
+	}
+
+	private Dictionary<string, (float servingSize, float calories, float carbs, float protein, float fat)> nutritionFacts = new Dictionary<string, (float, float, float, float, float)>
+	{
+		{ "oatmeal", (40.0f, 150.0f, 27.0f, 5.0f, 3.0f) },
+		{ "almond milk", (240.0f, 30.0f, 1.0f, 1.0f, 2.5f) },
+		{ "blueberries", (140.0f, 80.0f, 20.0f, 1.0f, 0.0f) },
+		{ "banana", (136f, 120f, 31f, 1f, 0f) },
+		{ "walnuts", (28f, 190f, 4f, 4f, 18f) },
+	};
+
+	private (string ingredient, float weight)[] ingredients = new (string, float)[] {
+		("oatmeal", 40.0f),
+		("walnuts", 20.0f),
+		("blueberries", 100.0f),
+		("almond milk", 240.0f)
+	};
+
+	private Dictionary<string, float> ingredientWeights = new Dictionary<string, float>();
+
 	// Start is called before the first frame update
 	void Start()
 	{
@@ -83,6 +140,11 @@ public class SelectableObjectBehavior : MonoBehaviour
 		markerMeshRenderer = marker.GetComponentInChildren<MeshRenderer>();
 		decentScaleEyeInteractable = decentScaleBLEMonoBehavior.gameObject.GetComponent<EyeInteractable>();
 		decentScaleMeshRenderer = decentScaleBLEMonoBehavior.gameObject.GetComponent<MeshRenderer>();
+		display = GameObject.Find("DecentScaleDisplay");
+		decentScaleWeightText = display.transform.Find("weight").GetComponent<TMPro.TMP_Text>();
+		decentScaleMacrosText = display.transform.Find("macros").GetComponent<TMPro.TMP_Text>();
+		decentScaleCaloriesText = display.transform.Find("calories").GetComponent<TMPro.TMP_Text>();
+
 		foreach (var eyeTrackingRay in eyeTrackingRays)
 		{
 			eyeTrackingRay.OnObjectHoverUpdate.AddListener(OnObjectHoverUpdate);
@@ -297,7 +359,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 				mode = Mode.ROTATING_OBJECT;
 				break;
 			case "tare":
-				// FILL
+				decentScale.Tare();
 				break;
 			case "recipe":
 				mode = Mode.SELECTING_RECIPE;
@@ -312,7 +374,9 @@ public class SelectableObjectBehavior : MonoBehaviour
 		loggerText.text = String.Format("recipe: {0}", text);
 		switch (text)
 		{
-			// FILL
+			case "oatmeal":
+				// FILL - start weighing first ingredient
+				break;
 			case "close":
 				mode = Mode.SELECTING_OBJECT;
 				break;
@@ -325,6 +389,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		bool shouldShowRecipeMenu = false;
 		bool shouldShowMarker = false;
 		bool shouldShowDecentScale = false;
+		bool shouldShowDecentScaleDisplay = false;
 
 		switch (mode)
 		{
@@ -376,7 +441,58 @@ public class SelectableObjectBehavior : MonoBehaviour
 			decentScaleMeshRenderer.enabled = shouldShowDecentScale;
 		}
 
+		if (shouldShowDecentScaleDisplay != display.activeSelf)
+		{
+			display.SetActive(shouldShowDecentScaleDisplay);
+		}
+
 		UpdateObjectHighlights();
+	}
+
+	private void UpdateWeightText()
+	{
+		if (display.activeSelf)
+		{
+			if (mode == Mode.WEIGHING_INGREDIENT)
+			{
+				decentScaleWeightText.text = String.Format("{0}/{1}g", decentScale.weight.ToString("N1"), 0.0f);
+			}
+			else
+			{
+				decentScaleWeightText.text = String.Format("{0}g", decentScale.weight);
+			}
+		}
+	}
+	private void UpdateMacrosText()
+	{
+		if (display.activeSelf)
+		{
+			// FILL
+		}
+	}
+	private void UpdateCaloriesText()
+	{
+		if (display.activeSelf)
+		{
+			// FILL
+		}
+	}
+
+	private void OnRecipeUpdate()
+	{
+		ingredientWeights.Clear();
+		OnUpdateIngredientWeights();
+		// FILL
+	}
+	private void OnIngredientUpdate()
+	{
+		decentScale.Tare();
+		// FILL
+	}
+
+	private void OnUpdateIngredientWeights()
+	{
+		// FILL - update macros and UI
 	}
 }
 
