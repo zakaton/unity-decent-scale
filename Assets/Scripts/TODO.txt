@@ -1,7 +1,4 @@
 ﻿demo
-	transform scale
-	show menu when looking at scale
-	select oatmeal
-	"continue" when placing bowl
-	add oats/milk/blueberries
-	display macros
+	display weight/macros
+	measuring UI (display macros)
+	"continue" UI to tare for next ingredient

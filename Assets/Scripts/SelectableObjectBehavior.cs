@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static DecentScale;
 using static UnityEngine.GraphicsBuffer;
 
 public class SelectableObjectBehavior : MonoBehaviour
@@ -20,7 +21,23 @@ public class SelectableObjectBehavior : MonoBehaviour
 	[SerializeField]
 	private TMPro.TMP_Text loggerText;
 
+	[SerializeField]
+	private DecentScaleBLEMonoBehavior decentScaleBLEMonoBehavior;
+	[HideInInspector]
+	private DecentScale decentScale
+	{
+		get
+		{
+			return decentScaleBLEMonoBehavior.decentScale;
+		}
+	}
+	[HideInInspector]
+	private EyeInteractable decentScaleEyeInteractable;
+	[HideInInspector]
+	private MeshRenderer decentScaleMeshRenderer;
+
 	private GameObject marker;
+	private MeshRenderer markerMeshRenderer;
 
 	[SerializeField]
 	private GameObject mainMenu;
@@ -39,6 +56,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		SELECTED_OBJECT,
 		MOVING_OBJECT,
 		ROTATING_OBJECT,
+		SELECTING_RECIPE,
 	}
 	private Mode _mode = Mode.NONE;
 	public Mode mode
@@ -58,38 +76,19 @@ public class SelectableObjectBehavior : MonoBehaviour
 		}
 	}
 
-	public enum ObjectType
-	{
-		cube,
-		sphere,
-		capsule,
-		cylinder
-	}
-	[Serializable]
-	public struct ObjectTypeStruct
-	{
-		public ObjectType type;
-		public GameObject prefab;
-	}
-	[SerializeField]
-	private ObjectTypeStruct[] objectTypeStructs;
-	private Dictionary<ObjectType, GameObject> objectTypes = new();
-
 	// Start is called before the first frame update
 	void Start()
 	{
 		marker = GameObject.Find("marker");
+		markerMeshRenderer = marker.GetComponentInChildren<MeshRenderer>();
+		decentScaleEyeInteractable = decentScaleBLEMonoBehavior.gameObject.GetComponent<EyeInteractable>();
+		decentScaleMeshRenderer = decentScaleBLEMonoBehavior.gameObject.GetComponent<MeshRenderer>();
 		foreach (var eyeTrackingRay in eyeTrackingRays)
 		{
 			eyeTrackingRay.OnObjectHoverUpdate.AddListener(OnObjectHoverUpdate);
 		}
 		mode = Mode.NONE;
-
-		for (int i = 0; i < objectTypeStructs.Length; i++)
-		{
-			var objectTypeStruct = objectTypeStructs[i];
-			objectTypes[objectTypeStruct.type] = objectTypeStruct.prefab;
-		}
+		OnModeUpdate();
 	}
 
 	private bool IsWaitingForObjectToInstantiate = false;
@@ -115,6 +114,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		if (!IsWaitingForObjectToInstantiate && selectedEyeInteractable != null)
 		{
 			var parent = selectedEyeInteractable.transform.parent;
+			//loggerText.text = marker.transform.position.ToString();
 			switch (mode)
 			{
 				case Mode.MOVING_OBJECT:
@@ -204,12 +204,9 @@ public class SelectableObjectBehavior : MonoBehaviour
 	}
 	private void UpdateMenuTransform(GameObject menu)
 	{
-		Vector3 position = (menu == mainMenu) ? selectedEyeInteractable.transform.position : marker.transform.position;
-		if (menu == mainMenu)
-		{
-			position += _camera.transform.right * 0.1f;
-			position += _camera.transform.up * 0.0f;
-		}
+		Vector3 position = selectedEyeInteractable.transform.position;
+		position += _camera.transform.right * 0.1f;
+		position += _camera.transform.up * 0.0f;
 		menu.transform.position = position;
 		//loggerText.text = position.ToString();
 
@@ -237,6 +234,14 @@ public class SelectableObjectBehavior : MonoBehaviour
 				{
 					var mainMenuText = hoveredButton.GetComponentInChildren<TMPro.TMP_Text>();
 					OnMainMenuTap(mainMenuText.text);
+					hoveredButton = null;
+				}
+				break;
+			case Mode.SELECTING_RECIPE:
+				if (hoveredButton != null)
+				{
+					var recipeMenuText = hoveredButton.GetComponentInChildren<TMPro.TMP_Text>();
+					OnRecipeMenuTap(recipeMenuText.text);
 					hoveredButton = null;
 				}
 				break;
@@ -270,7 +275,14 @@ public class SelectableObjectBehavior : MonoBehaviour
 
 	private void OnMiddleTap()
 	{
-
+		switch (mode)
+		{
+			case Mode.NONE:
+			case Mode.SELECTING_OBJECT:
+			case Mode.SELECTED_OBJECT:
+				mode = Mode.MOVING_OBJECT;
+				break;
+		}
 	}
 
 	private void OnMainMenuTap(string text)
@@ -288,8 +300,19 @@ public class SelectableObjectBehavior : MonoBehaviour
 				// FILL
 				break;
 			case "recipe":
-				// FILL
+				mode = Mode.SELECTING_RECIPE;
 				break;
+			case "close":
+				mode = Mode.SELECTING_OBJECT;
+				break;
+		}
+	}
+	private void OnRecipeMenuTap(string text)
+	{
+		loggerText.text = String.Format("recipe: {0}", text);
+		switch (text)
+		{
+			// FILL
 			case "close":
 				mode = Mode.SELECTING_OBJECT;
 				break;
@@ -301,6 +324,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		bool shouldShowMainMenu = false;
 		bool shouldShowRecipeMenu = false;
 		bool shouldShowMarker = false;
+		bool shouldShowDecentScale = false;
 
 		switch (mode)
 		{
@@ -312,8 +336,12 @@ public class SelectableObjectBehavior : MonoBehaviour
 				shouldShowMainMenu = true;
 				break;
 			case Mode.MOVING_OBJECT:
-				break;
 			case Mode.ROTATING_OBJECT:
+				selectedEyeInteractable = decentScaleEyeInteractable;
+				shouldShowDecentScale = true;
+				break;
+			case Mode.SELECTING_RECIPE:
+				shouldShowRecipeMenu = true;
 				break;
 		}
 
@@ -334,15 +362,21 @@ public class SelectableObjectBehavior : MonoBehaviour
 			recipeMenu.SetActive(shouldShowRecipeMenu);
 		}
 
-		if (shouldShowMarker != marker.activeSelf)
+		if (shouldShowMarker != markerMeshRenderer.enabled)
 		{
 			if (!shouldShowMarker)
 			{
 				markerPosition = marker.transform.position;
 			}
-			marker.SetActive(shouldShowMarker);
+			markerMeshRenderer.enabled = shouldShowMarker;
+		}
+
+		if (shouldShowDecentScale != decentScaleMeshRenderer.enabled)
+		{
+			decentScaleMeshRenderer.enabled = shouldShowDecentScale;
 		}
 
 		UpdateObjectHighlights();
 	}
 }
+

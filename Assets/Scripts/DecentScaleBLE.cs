@@ -17,10 +17,21 @@ public class DecentScaleBLE : DecentScale
 	static private string GENERATE_MAIN_UUID(string value)
 	{
 		return value;
-		//return String.Format("0000{0}-0000-1000-8000-00805f9b34fb", value);
+	}
+	static private string GENERATE_FULL_MAIN_UUID(string value)
+	{
+		return String.Format("0000{0}-0000-1000-8000-00805f9b34fb", value);
 	}
 	static bool IsEqual(string uuid1, string uuid2)
 	{
+		if (uuid1.Length > 4)
+		{
+			uuid1 = uuid1.Substring(4, 4);
+		}
+		if (uuid2.Length > 4)
+		{
+			uuid2 = uuid2.Substring(4, 4);
+		}
 		return (uuid1.ToUpper().Equals(uuid2.ToUpper()));
 	}
 
@@ -181,7 +192,18 @@ public class DecentScaleBLE : DecentScale
 				isSendingCommand = true;
 				formatCommandData(commandData);
 				var data = commandData.ToArray();
-				BluetoothLEHardwareInterface.WriteCharacteristic(_deviceAddress, mainServiceUUID, commandCharacteristicUUID, data, data.Length, true, (characteristicUUID) =>
+				StatusMessage = "sending command...";
+				var serviceUUID = mainServiceUUID;
+				if (serviceUUID.Length == 4)
+				{
+					serviceUUID = GENERATE_FULL_MAIN_UUID(serviceUUID);
+				}
+				var characreristicUUID = commandCharacteristicUUID;
+				if (characreristicUUID.Length == 4)
+				{
+					characreristicUUID = GENERATE_FULL_MAIN_UUID(characreristicUUID);
+				}
+				BluetoothLEHardwareInterface.WriteCharacteristic(_deviceAddress, serviceUUID, characreristicUUID, data, data.Length, true, (characteristicUUID) =>
 				{
 					BluetoothLEHardwareInterface.Log("Write Succeeded");
 					isSendingCommand = false;
@@ -194,6 +216,10 @@ public class DecentScaleBLE : DecentScale
 					}
 				});
 			}
+		}
+		else
+		{
+			StatusMessage = "unable to send command...";
 		}
 	}
 
@@ -287,7 +313,9 @@ public class DecentScaleBLE : DecentScale
 						// large enough that it will be finished enumerating before you try to subscribe or do any other operations.
 						BluetoothLEHardwareInterface.ConnectToPeripheral(_deviceAddress, null, null, (address, serviceUUID, characteristicUUID) =>
 						{
+							StatusMessage = String.Format("serviceUUID: {0}", serviceUUID);
 							BluetoothLEHardwareInterface.StopScan();
+
 
 							if (IsEqual(serviceUUID, mainServiceUUID))
 							{
@@ -327,30 +355,29 @@ public class DecentScaleBLE : DecentScale
 						{
 							string characteristicUUID = subscriptionCharacteristicUUIDs[index];
 							string serviceUUID = characteristicUUIDToServiceUUID[characteristicUUID];
-
 							StatusMessage = String.Format("suscribing to #{0}: {1}", index, characteristicUUID);
 							BluetoothLEHardwareInterface.SubscribeCharacteristicWithDeviceAddress(_deviceAddress, serviceUUID, characteristicUUID, (notifyAddress, notifyCharacteristic) =>
-					{
-						_state = States.None;
+							{
+								_state = States.None;
 
-						SetState(States.ReadRSSI, 1f);
+								SetState(States.ReadRSSI, 1f);
 
-					}, (address, characteristicUUID, bytes) =>
-					{
-						if (_state != States.None)
-						{
-							// some devices do not properly send the notification state change which calls
-							// the lambda just above this one so in those cases we don't have a great way to
-							// set the state other than waiting until we actually got some data back.
-							// The esp32 sends the notification above, but if yuor device doesn't you would have
-							// to send data like pressing the button on the esp32 as the sketch for this demo
-							// would then send data to trigger this.
-							SetState(States.ReadRSSI, 1f);
-						}
+							}, (address, characteristicUUID, bytes) =>
+							{
+								if (_state != States.None)
+								{
+									// some devices do not properly send the notification state change which calls
+									// the lambda just above this one so in those cases we don't have a great way to
+									// set the state other than waiting until we actually got some data back.
+									// The esp32 sends the notification above, but if yuor device doesn't you would have
+									// to send data like pressing the button on the esp32 as the sketch for this demo
+									// would then send data to trigger this.
+									SetState(States.ReadRSSI, 1f);
+								}
 
-						// we received some data from the device
-						OnData(characteristicUUID, bytes);
-					});
+								// we received some data from the device
+								OnData(characteristicUUID, bytes);
+							});
 						}
 
 						StatusMessage = "Finished Subscribing to characteristics!";

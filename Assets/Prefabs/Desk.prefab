@@ -127,7 +127,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f63316574b35d434f8440d18cdd5f67b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loggerText: {fileID: 0}
 --- !u!114 &8815450435406640663
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,7 +147,13 @@ MonoBehaviour:
       m_Calls: []
   OnHoverActiveMaterial: {fileID: 2100000, guid: 8e9357bfedaf54ea6bb9b00ad7cd5599, type: 2}
   OnHoverInactiveMaterial: {fileID: 2100000, guid: 34820efcb0ad94989b47cc74e112d21a, type: 2}
+  IsSelectable: 0
+  IsButton: 0
+  _scale: {x: 0, y: 0, z: 0}
   _collider: {fileID: 5490990856333309300}
+  deleted: 0
+  initialized: 0
   hitPoint: {x: 0, y: 0, z: 0}
   didHoverFlag: 0
+  isLarge: 0
   ShouldIgnore: 0

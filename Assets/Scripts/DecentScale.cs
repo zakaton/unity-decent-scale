@@ -283,6 +283,8 @@ public class DecentScale
 		connectionEvents.onConnect.AddListener(OnConnect);
 	}
 
+	private bool shouldSetLED = false;
+	private float shouldSetLEDTime = 0;
 	public virtual void Update()
 	{
 		checkShowWeight();
@@ -296,13 +298,21 @@ public class DecentScale
 		checkTare();
 
 		checkPowerOff();
+
+		if (shouldSetLED && Time.time > shouldSetLEDTime)
+		{
+			_SetLED();
+			shouldSetLED = false;
+		}
 	}
 	public virtual void Connect() { }
 	public virtual void Disconnect() { }
 
 	public void OnConnect()
 	{
-		SetLED();
+		shouldSetLEDTime = Time.time + 2;
+		shouldSetLED = true;
+		//SetLED();
 	}
 
 	public enum Command
