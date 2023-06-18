@@ -112,8 +112,8 @@ public class SelectableObjectBehavior : MonoBehaviour
 
 	private (string name, float weight)[] ingredients = new (string, float)[] {
 		("oatmeal", 40.0f),
-		("walnuts", 20.0f),
-		("blueberries", 100.0f),
+		("walnuts", 15.0f),
+		("blueberries", 70.0f),
 		("almond milk", 240.0f)
 	};
 	private float calories = 0;
@@ -126,8 +126,9 @@ public class SelectableObjectBehavior : MonoBehaviour
 		set
 		{
 			_ingredientIndex = value;
-			initialStableTimestamp = 0;
 			currentIngredient = ingredients[ingredientIndex];
+			initialStableTimestamp = -1;
+			wasStable = false;
 			OnIngredientUpdate();
 		}
 
@@ -163,7 +164,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 
 	private void OnConnect()
 	{
-		//currentRecipe = "oatmeal";
+		currentRecipe = "oatmeal";
 	}
 
 	private bool IsWaitingForObjectToInstantiate = false;
@@ -582,24 +583,25 @@ public class SelectableObjectBehavior : MonoBehaviour
 		}
 	}
 
-	private float initialStableTimestamp = 0;
+	private float initialStableTimestamp = -1;
 	private bool wasStable = false;
 	private void OnWeightData(float weight, bool isStable, WeightTimestamp weightTimestamp)
 	{
 		if (mode == Mode.WEIGHING_INGREDIENT)
 		{
 			ingredientWeights[currentIngredient.name] = weight;
-			bool isWeightClose = Mathf.Abs(currentIngredient.weight - weight) < 2;
-			if (wasStable != isStable)
+			bool isWeightClose = Mathf.Abs(currentIngredient.weight - weight) < 1;
+			if (isWeightClose && isStable && !wasStable)
 			{
-				wasStable = isStable;
-				if (isStable && isWeightClose)
-				{
-					initialStableTimestamp = Time.time;
-				}
+				wasStable = true;
+				initialStableTimestamp = Time.time;
 			}
-			//loggerText.text = (Time.time - initialStableTimestamp).ToString();
-			if (isWeightClose && isStable && (Time.time - initialStableTimestamp) > 2)
+			if (!isStable && wasStable)
+			{
+				wasStable = false;
+				initialStableTimestamp = -1;
+			}
+			if (isWeightClose && isStable && initialStableTimestamp > 0 && (Time.time - initialStableTimestamp) > 1)
 			{
 				if (ingredientIndex + 1 < ingredients.Length)
 				{
@@ -608,6 +610,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 				else
 				{
 					mode = Mode.NONE;
+					UpdateTitleText();
 				}
 			}
 		}
