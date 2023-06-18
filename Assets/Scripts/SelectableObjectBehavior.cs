@@ -126,9 +126,11 @@ public class SelectableObjectBehavior : MonoBehaviour
 		set
 		{
 			_ingredientIndex = value;
+			initialStableTimestamp = 0;
 			currentIngredient = ingredients[ingredientIndex];
 			OnIngredientUpdate();
 		}
+
 	}
 	private (string name, float weight) currentIngredient;
 
@@ -557,7 +559,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{
 			if (currentRecipe == null)
 			{
-				decentScaleMacrosText.text = "";
+				//decentScaleMacrosText.text = "";
 			}
 			else
 			{
@@ -571,7 +573,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{
 			if (currentRecipe == null)
 			{
-				decentScaleCaloriesText.text = "";
+				//decentScaleCaloriesText.text = "";
 			}
 			else
 			{
@@ -580,12 +582,34 @@ public class SelectableObjectBehavior : MonoBehaviour
 		}
 	}
 
+	private float initialStableTimestamp = 0;
+	private bool wasStable = false;
 	private void OnWeightData(float weight, bool isStable, WeightTimestamp weightTimestamp)
 	{
 		if (mode == Mode.WEIGHING_INGREDIENT)
 		{
 			ingredientWeights[currentIngredient.name] = weight;
-			// FILL - if stable for 2 seconds, move onto next ingredient
+			bool isWeightClose = Mathf.Abs(currentIngredient.weight - weight) < 2;
+			if (wasStable != isStable)
+			{
+				wasStable = isStable;
+				if (isStable && isWeightClose)
+				{
+					initialStableTimestamp = Time.time;
+				}
+			}
+			//loggerText.text = (Time.time - initialStableTimestamp).ToString();
+			if (isWeightClose && isStable && (Time.time - initialStableTimestamp) > 2)
+			{
+				if (ingredientIndex + 1 < ingredients.Length)
+				{
+					ingredientIndex++;
+				}
+				else
+				{
+					mode = Mode.NONE;
+				}
+			}
 		}
 		OnUpdateIngredientWeights();
 	}
