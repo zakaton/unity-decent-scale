@@ -156,6 +156,12 @@ public class SelectableObjectBehavior : MonoBehaviour
 		OnModeUpdate();
 
 		decentScale.decentScaleEvents.weight.AddListener(OnWeightData);
+		decentScale.connectionEvents.onConnect.AddListener(OnConnect);
+	}
+
+	private void OnConnect()
+	{
+		//currentRecipe = "oatmeal";
 	}
 
 	private bool IsWaitingForObjectToInstantiate = false;
@@ -229,7 +235,6 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{
 			return;
 		}
-
 
 		var isLarge = eyeInteractable.IsHovered;
 		if (isLarge != eyeInteractable.isLarge)
@@ -353,6 +358,9 @@ public class SelectableObjectBehavior : MonoBehaviour
 			case Mode.SELECTED_OBJECT:
 				mode = Mode.MOVING_OBJECT;
 				break;
+			case Mode.WEIGHING_INGREDIENT:
+				decentScale.Tare();
+				break;
 		}
 	}
 
@@ -471,11 +479,10 @@ public class SelectableObjectBehavior : MonoBehaviour
 		macros.carbs = 0f;
 		OnUpdateIngredientWeights();
 
-		UpdateTitleText();
-
 		ingredientIndex = 0;
-
 		mode = Mode.WEIGHING_INGREDIENT;
+
+		UpdateTitleText();
 	}
 	private void OnIngredientUpdate()
 	{

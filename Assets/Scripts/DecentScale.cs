@@ -349,12 +349,15 @@ public class DecentScale
 
 	public void Tare(int incrementedInteger = 0)
 	{
-		var commandData = new List<byte> {
+		if (IsConnected)
+		{
+			var commandData = new List<byte> {
 			(byte)Command.tare,
 			(byte)incrementedInteger,
 			0, 0, 0
 		};
-		sendCommand(commandData);
+			sendCommand(commandData);
+		}
 	}
 	public void SetLED(bool showWeight = false, bool showTimer = false, bool showGrams = true)
 	{
@@ -459,7 +462,7 @@ public class DecentScale
 	{
 		//StatusMessage = String.Format("ProcessWeightData {0}", bytes.Length);
 		isStable = bytes[byteOffset + 1] == (int)Command.stableWeight;
-		weight = (float)ToInt16(bytes, byteOffset + 2, false);
+		weight = (float)ToInt16(bytes, byteOffset + 2, false) / 10;
 		var _byteLength = bytes.Length - byteOffset;
 		if (_byteLength == 7)
 		{
