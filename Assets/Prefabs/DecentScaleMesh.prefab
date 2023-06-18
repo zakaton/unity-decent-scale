@@ -133,12 +133,15 @@ MonoBehaviour:
   OnObjectUnHover:
     m_PersistentCalls:
       m_Calls: []
-  OnHoverActiveMaterial: {fileID: 0}
-  OnHoverInactiveMaterial: {fileID: 0}
+  OnHoverActiveMaterial: {fileID: 2100000, guid: 8e9357bfedaf54ea6bb9b00ad7cd5599, type: 2}
+  OnHoverInactiveMaterial: {fileID: 2100000, guid: 34820efcb0ad94989b47cc74e112d21a, type: 2}
   IsSelectable: 1
   IsButton: 0
   _scale: {x: 0, y: 0, z: 0}
   _collider: {fileID: 2562230537398256632}
+  deleted: 0
+  initialized: 0
   hitPoint: {x: 0, y: 0, z: 0}
   didHoverFlag: 0
+  isLarge: 0
   ShouldIgnore: 0

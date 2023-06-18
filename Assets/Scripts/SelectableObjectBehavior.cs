@@ -151,6 +151,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{
 			eyeTrackingRay.OnObjectHoverUpdate.AddListener(OnObjectHoverUpdate);
 		}
+
 		mode = Mode.NONE;
 		OnModeUpdate();
 
@@ -228,6 +229,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{
 			return;
 		}
+
 
 		var isLarge = eyeInteractable.IsHovered;
 		if (isLarge != eyeInteractable.isLarge)
@@ -495,13 +497,15 @@ public class SelectableObjectBehavior : MonoBehaviour
 		float _calories = 0;
 		var _macros = (protein: 0f, carbs: 0f, fat: 0f);
 
-		for (int i = 0; i < ingredients.Length; i++)
+		foreach (var ingredientWeight in ingredientWeights)
 		{
-			var ingredient = ingredients[i];
-			if (nutritionFacts.ContainsKey(ingredient.name))
+			var name = ingredientWeight.Key;
+			var weight = ingredientWeight.Value;
+
+			if (nutritionFacts.ContainsKey(name))
 			{
-				var _nutritionFacts = nutritionFacts[ingredient.name];
-				var servings = ingredientWeights[ingredient.name] / _nutritionFacts.servingSize;
+				var _nutritionFacts = nutritionFacts[name];
+				var servings = ingredientWeights[name] / _nutritionFacts.servingSize;
 				_calories += servings * _nutritionFacts.calories;
 				_macros.protein += servings * _nutritionFacts.protein;
 				_macros.carbs += servings * _nutritionFacts.carbs;
@@ -532,7 +536,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{
 			if (mode == Mode.WEIGHING_INGREDIENT)
 			{
-				decentScaleWeightText.text = String.Format("{0}/{1}g", decentScale.weight.ToString("N1"), currentIngredient.weight.ToString("N1"));
+				decentScaleWeightText.text = String.Format("{0}/{1}g", decentScale.weight.ToString("N1"), Mathf.RoundToInt(currentIngredient.weight));
 			}
 			else
 			{
@@ -564,7 +568,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 			}
 			else
 			{
-				decentScaleCaloriesText.text = String.Format("{0} cal", calories.ToString("N1"));
+				decentScaleCaloriesText.text = String.Format("{0} cal", Mathf.RoundToInt(calories));
 			}
 		}
 	}
