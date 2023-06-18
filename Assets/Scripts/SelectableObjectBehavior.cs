@@ -112,8 +112,8 @@ public class SelectableObjectBehavior : MonoBehaviour
 
 	private (string name, float weight)[] ingredients = new (string, float)[] {
 		("oatmeal", 40.0f),
-		("walnuts", 15.0f),
-		("blueberries", 70.0f),
+		("walnuts", 20.0f),
+		("blueberries", 50.0f),
 		("almond milk", 240.0f)
 	};
 	private float calories = 0;
@@ -164,7 +164,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 
 	private void OnConnect()
 	{
-		currentRecipe = "oatmeal";
+		//currentRecipe = "oatmeal";
 	}
 
 	private bool IsWaitingForObjectToInstantiate = false;
