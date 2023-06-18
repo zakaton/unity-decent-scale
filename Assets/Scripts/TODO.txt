@@ -1,7 +1,2 @@
 ﻿demo
-	display weight/macros/calories
-	rotate display to face user
-	SetIngredient()
-		tares scale
-		goes to next ingredient if stable for 1 second
-		goes to "none" if done (keeps UI in view)
+	go to next ingredient if stable for 2 second

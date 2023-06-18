@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -40,6 +41,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 	private MeshRenderer markerMeshRenderer;
 
 	private GameObject display;
+	private TMPro.TMP_Text decentScaleTitleText;
 	private TMPro.TMP_Text decentScaleWeightText;
 	private TMPro.TMP_Text decentScaleMacrosText;
 	private TMPro.TMP_Text decentScaleCaloriesText;
@@ -82,7 +84,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		}
 	}
 
-	private string _currentRecipe;
+	private string _currentRecipe = null;
 	private string currentRecipe
 	{
 		get
@@ -98,22 +100,6 @@ public class SelectableObjectBehavior : MonoBehaviour
 			}
 		}
 	}
-	private string _currentIngredient;
-	private string currentIngredient
-	{
-		get
-		{
-			return _currentIngredient;
-		}
-		set
-		{
-			if (_currentIngredient != value)
-			{
-				_currentIngredient = value;
-				OnIngredientUpdate();
-			}
-		}
-	}
 
 	private Dictionary<string, (float servingSize, float calories, float carbs, float protein, float fat)> nutritionFacts = new Dictionary<string, (float, float, float, float, float)>
 	{
@@ -124,12 +110,27 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{ "walnuts", (28f, 190f, 4f, 4f, 18f) },
 	};
 
-	private (string ingredient, float weight)[] ingredients = new (string, float)[] {
+	private (string name, float weight)[] ingredients = new (string, float)[] {
 		("oatmeal", 40.0f),
 		("walnuts", 20.0f),
 		("blueberries", 100.0f),
 		("almond milk", 240.0f)
 	};
+	private float calories = 0;
+	private (float protein, float carbs, float fat) macros = (0f, 0f, 0f);
+
+	private int _ingredientIndex = 0;
+	private int ingredientIndex
+	{
+		get { return _ingredientIndex; }
+		set
+		{
+			_ingredientIndex = value;
+			currentIngredient = ingredients[ingredientIndex];
+			OnIngredientUpdate();
+		}
+	}
+	private (string name, float weight) currentIngredient;
 
 	private Dictionary<string, float> ingredientWeights = new Dictionary<string, float>();
 
@@ -141,6 +142,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		decentScaleEyeInteractable = decentScaleBLEMonoBehavior.gameObject.GetComponent<EyeInteractable>();
 		decentScaleMeshRenderer = decentScaleBLEMonoBehavior.gameObject.GetComponent<MeshRenderer>();
 		display = GameObject.Find("DecentScaleDisplay");
+		decentScaleTitleText = display.transform.Find("title").GetComponent<TMPro.TMP_Text>();
 		decentScaleWeightText = display.transform.Find("weight").GetComponent<TMPro.TMP_Text>();
 		decentScaleMacrosText = display.transform.Find("macros").GetComponent<TMPro.TMP_Text>();
 		decentScaleCaloriesText = display.transform.Find("calories").GetComponent<TMPro.TMP_Text>();
@@ -151,6 +153,8 @@ public class SelectableObjectBehavior : MonoBehaviour
 		}
 		mode = Mode.NONE;
 		OnModeUpdate();
+
+		decentScale.decentScaleEvents.weight.AddListener(OnWeightData);
 	}
 
 	private bool IsWaitingForObjectToInstantiate = false;
@@ -264,18 +268,21 @@ public class SelectableObjectBehavior : MonoBehaviour
 			mode = Mode.SELECTING_OBJECT;
 		}
 	}
-	private void UpdateMenuTransform(GameObject menu)
+	private void UpdateTransform(Transform _transform, bool isLeft = false)
 	{
 		Vector3 position = selectedEyeInteractable.transform.position;
-		position += _camera.transform.right * 0.1f;
+		position += _camera.transform.right * (isLeft ? -0.1f : 0.1f);
 		position += _camera.transform.up * 0.0f;
-		menu.transform.position = position;
-		//loggerText.text = position.ToString();
+		_transform.position = position;
 
+		RotateToFaceCamera(_transform);
+	}
+	private void RotateToFaceCamera(Transform _transform)
+	{
 		var target = _camera.transform.position;
-		target.y = menu.transform.position.y;
-		menu.transform.LookAt(target);
-		menu.transform.RotateAround(menu.transform.position, transform.up, 180f);
+		//target.y = _transform.position.y;
+		_transform.LookAt(target);
+		_transform.RotateAround(_transform.position, _transform.up, 180f);
 	}
 
 	private void OnPointerTap()
@@ -375,7 +382,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		switch (text)
 		{
 			case "oatmeal":
-				// FILL - start weighing first ingredient
+				currentRecipe = "oatmeal";
 				break;
 			case "close":
 				mode = Mode.SELECTING_OBJECT;
@@ -389,7 +396,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		bool shouldShowRecipeMenu = false;
 		bool shouldShowMarker = false;
 		bool shouldShowDecentScale = false;
-		bool shouldShowDecentScaleDisplay = false;
+		bool shouldShowDecentScaleDisplay = true;
 
 		switch (mode)
 		{
@@ -414,7 +421,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{
 			if (shouldShowMainMenu)
 			{
-				UpdateMenuTransform(mainMenu);
+				UpdateTransform(mainMenu.transform);
 			}
 			mainMenu.SetActive(shouldShowMainMenu);
 		}
@@ -422,7 +429,7 @@ public class SelectableObjectBehavior : MonoBehaviour
 		{
 			if (shouldShowRecipeMenu)
 			{
-				UpdateMenuTransform(recipeMenu);
+				UpdateTransform(recipeMenu.transform);
 			}
 			recipeMenu.SetActive(shouldShowRecipeMenu);
 		}
@@ -441,25 +448,95 @@ public class SelectableObjectBehavior : MonoBehaviour
 			decentScaleMeshRenderer.enabled = shouldShowDecentScale;
 		}
 
-		if (shouldShowDecentScaleDisplay != display.activeSelf)
+		if (true || shouldShowDecentScaleDisplay != display.activeSelf)
 		{
 			display.SetActive(shouldShowDecentScaleDisplay);
+			if (shouldShowDecentScaleDisplay)
+			{
+				RotateToFaceCamera(display.transform);
+			}
 		}
 
 		UpdateObjectHighlights();
 	}
 
+	private void OnRecipeUpdate()
+	{
+		ingredientWeights.Clear();
+
+		macros.protein = 0f;
+		macros.fat = 0f;
+		macros.carbs = 0f;
+		OnUpdateIngredientWeights();
+
+		UpdateTitleText();
+
+		ingredientIndex = 0;
+
+		mode = Mode.WEIGHING_INGREDIENT;
+	}
+	private void OnIngredientUpdate()
+	{
+		decentScale.Tare();
+		UpdateTitleText();
+	}
+
+	private void OnUpdateIngredientWeights()
+	{
+		UpdateMacros();
+
+		UpdateCaloriesText();
+		UpdateMacrosText();
+		UpdateWeightText();
+	}
+
+	private void UpdateMacros()
+	{
+		float _calories = 0;
+		var _macros = (protein: 0f, carbs: 0f, fat: 0f);
+
+		for (int i = 0; i < ingredients.Length; i++)
+		{
+			var ingredient = ingredients[i];
+			if (nutritionFacts.ContainsKey(ingredient.name))
+			{
+				var _nutritionFacts = nutritionFacts[ingredient.name];
+				var servings = ingredientWeights[ingredient.name] / _nutritionFacts.servingSize;
+				_calories += servings * _nutritionFacts.calories;
+				_macros.protein += servings * _nutritionFacts.protein;
+				_macros.carbs += servings * _nutritionFacts.carbs;
+				_macros.fat += servings * _nutritionFacts.fat;
+			}
+		}
+		calories = _calories;
+		macros = _macros;
+	}
+
+	private void UpdateTitleText()
+	{
+		if (display.activeSelf)
+		{
+			if (mode == Mode.WEIGHING_INGREDIENT)
+			{
+				decentScaleTitleText.text = currentIngredient.name;
+			}
+			else
+			{
+				decentScaleTitleText.text = "weight";
+			}
+		}
+	}
 	private void UpdateWeightText()
 	{
 		if (display.activeSelf)
 		{
 			if (mode == Mode.WEIGHING_INGREDIENT)
 			{
-				decentScaleWeightText.text = String.Format("{0}/{1}g", decentScale.weight.ToString("N1"), 0.0f);
+				decentScaleWeightText.text = String.Format("{0}/{1}g", decentScale.weight.ToString("N1"), currentIngredient.weight.ToString("N1"));
 			}
 			else
 			{
-				decentScaleWeightText.text = String.Format("{0}g", decentScale.weight);
+				decentScaleWeightText.text = String.Format("{0}g", decentScale.weight.ToString("N1"));
 			}
 		}
 	}
@@ -467,32 +544,38 @@ public class SelectableObjectBehavior : MonoBehaviour
 	{
 		if (display.activeSelf)
 		{
-			// FILL
+			if (currentRecipe == null)
+			{
+				decentScaleMacrosText.text = "";
+			}
+			else
+			{
+				decentScaleMacrosText.text = String.Format("{0}c/{1}p/{2}f", Mathf.RoundToInt(macros.carbs), Mathf.RoundToInt(macros.protein), Mathf.RoundToInt(macros.fat));
+			}
 		}
 	}
 	private void UpdateCaloriesText()
 	{
 		if (display.activeSelf)
 		{
-			// FILL
+			if (currentRecipe == null)
+			{
+				decentScaleCaloriesText.text = "";
+			}
+			else
+			{
+				decentScaleCaloriesText.text = String.Format("{0} cal", calories.ToString("N1"));
+			}
 		}
 	}
 
-	private void OnRecipeUpdate()
+	private void OnWeightData(float weight, bool isStable, WeightTimestamp weightTimestamp)
 	{
-		ingredientWeights.Clear();
+		if (mode == Mode.WEIGHING_INGREDIENT)
+		{
+			ingredientWeights[currentIngredient.name] = weight;
+			// FILL - if stable for 2 seconds, move onto next ingredient
+		}
 		OnUpdateIngredientWeights();
-		// FILL
-	}
-	private void OnIngredientUpdate()
-	{
-		decentScale.Tare();
-		// FILL
-	}
-
-	private void OnUpdateIngredientWeights()
-	{
-		// FILL - update macros and UI
 	}
 }
-
